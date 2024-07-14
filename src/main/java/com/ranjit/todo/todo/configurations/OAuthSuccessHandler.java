@@ -39,6 +39,6 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         user.setProvider("google");
         ResponseEntity<LoginUserResponse> res =  _authService.oauthLogin(user);
         String token = Objects.requireNonNull(res.getBody()).getToken();
-        response.sendRedirect("http://localhost:4200/auth/login/google?token="+token);
+        response.sendRedirect("http://localhost:4200/auth/google?token="+token);
     }
 }

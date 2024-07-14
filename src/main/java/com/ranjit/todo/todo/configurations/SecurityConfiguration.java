@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth-> auth.requestMatchers("auth/**","login/**").permitAll().anyRequest().authenticated())
                 .sessionManagement(sess-> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .cors(cors-> cors.disable())
-//                .cors(cors-> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors-> cors.configurationSource(corsConfigurationSource()))
                 .authenticationProvider(_authenticationProvider)
                 .addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -53,9 +53,9 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:8005"));
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET","POST"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization","Content-Type","Access-Control-Allow-Credentials"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

@@ -42,25 +42,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-        _logger.info("Request URL: {}", request.getRequestURI());
-        final String authHeader = request.getHeader("Authorization");
-
-//        Jugad for now to ignore filter for auth paths
-        if (request.getRequestURI().startsWith("/auth/")) {
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        String requrestUri = request.getRequestURI();
+        _logger.info("Request URL: {}", requrestUri);
+        if (requrestUri.startsWith("/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
+
+         String authHeader = request.getHeader("Authorization");
+        if (requrestUri.startsWith("/ws-message")) {
+            authHeader = request.getParameter("access_token");
+        }
+        _logger.info("Auth Header: {}", authHeader);
         try {
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 _logger.error("Authorization header is missing");
                 throw new AuthenticationException("Authorization header is missing");
             }
             final String jwt = authHeader.substring(7);
-            final String userEmail = jwtService.extractUsername(jwt);
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-
+            final String userId = jwtService.extractUserId(jwt);
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userId);
+            _logger.info("User Details: {}", userDetails);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 request.setAttribute("user", userDetails);

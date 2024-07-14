@@ -1,6 +1,7 @@
 package com.ranjit.todo.todo.services;
 
 
+import com.ranjit.todo.todo.entities.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,7 +24,7 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -31,12 +32,12 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-    public String generateToken(UserDetails userDetails){
-        return buildToken(Map.of(),userDetails,expiration);
+    public String generateToken(UserEntity UserEntity){
+        return buildToken(Map.of(),UserEntity,expiration);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
+        final String username = extractUserId(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
     private boolean isTokenExpired(String token) {
@@ -50,12 +51,12 @@ public class JwtService {
 
     private String buildToken(
             Map<String,Object> extraClaims,
-            UserDetails userDetails,
+            UserEntity userDetails,
             long expiration
     ){
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(userDetails.getId().toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(),SignatureAlgorithm.HS512)
