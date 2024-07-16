@@ -21,10 +21,10 @@ public class AuthController {
         this._authService = _authService;
     }
 
-    @GetMapping(path = "")
-    public UserDTO getUser() {
-        return new UserDTO(new Long(123), "Ranjit Kumar Pandit", "ranjitkumar448@yahoo.com", "Test@123", "https://www.google.com", "google");
-    }
+//    @GetMapping(path = "")
+//    public UserDTO getUser() {
+//        return new UserDTO(new Long(123), "Ranjit Kumar Pandit", "ranjitkumar448@yahoo.com", "Test@123", "https://www.google.com", "google");
+//    }
 
     ;
 

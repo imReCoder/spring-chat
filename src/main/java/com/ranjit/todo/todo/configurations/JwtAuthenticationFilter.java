@@ -55,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (requrestUri.startsWith("/ws-message")) {
             authHeader = request.getParameter("access_token");
         }
-        _logger.info("Auth Header: {}", authHeader);
         try {
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 _logger.error("Authorization header is missing");
@@ -64,10 +63,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String jwt = authHeader.substring(7);
             final String userId = jwtService.extractUserId(jwt);
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userId);
-            _logger.info("User Details: {}", userDetails);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                request.setAttribute("user", userDetails);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 filterChain.doFilter(request, response);
