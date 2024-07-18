@@ -40,6 +40,11 @@ public class UserService {
         return user.map(userEntity -> _modelMapper.map(userEntity, UserDTO.class)).orElse(null);
     }
 
+    public UserEntity getUserEntityById(Long id) {
+        Optional<UserEntity> user = _userRepository.findById(id);
+        return user.orElse(null);
+    }
+
     public List<UserDTO> searchUsers(String searchKey) {
         _logger.info("Searching for user with key: {}", searchKey);
         try {
