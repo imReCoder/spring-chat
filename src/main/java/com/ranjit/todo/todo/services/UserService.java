@@ -1,6 +1,7 @@
 package com.ranjit.todo.todo.services;
 
 import com.ranjit.todo.todo.dtos.UserDTO;
+import com.ranjit.todo.todo.dtos.UserStatusUpdate;
 import com.ranjit.todo.todo.entities.UserEntity;
 import com.ranjit.todo.todo.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -24,10 +25,12 @@ public class UserService {
 
     private final ModelMapper _modelMapper;
     private final UserRepository _userRepository;
+    private final UserOnlineStatus userOnlineStatus;
 
-    public UserService(ModelMapper _modelMapper, UserRepository _userRepository) {
+    public UserService(ModelMapper _modelMapper, UserRepository _userRepository,UserOnlineStatus userOnlineStatus) {
         this._modelMapper = _modelMapper;
         this._userRepository = _userRepository;
+        this.userOnlineStatus = userOnlineStatus;
     }
 
     public UserDTO getCurrentUser() {
@@ -58,5 +61,19 @@ public class UserService {
         } catch (Exception e) {
             return List.of();
         }
+
     }
+
+
+   public  List<UserStatusUpdate> getUsersStatus(List<String> userIds){
+        return userIds.stream()
+                .map(userId -> {
+                    UserStatusUpdate userStatusUpdate = new UserStatusUpdate();
+                    userStatusUpdate.setUserId(userId);
+                    userStatusUpdate.setStatus(userOnlineStatus.isUserOnline(userId));
+                    return userStatusUpdate;
+                })
+                .toList();
+
+    };
 }

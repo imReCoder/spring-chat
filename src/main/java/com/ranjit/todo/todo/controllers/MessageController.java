@@ -1,8 +1,11 @@
 package com.ranjit.todo.todo.controllers;
 
 import com.ranjit.todo.todo.dtos.ChatMessageDTO;
+import com.ranjit.todo.todo.dtos.MessageIdsDTO;
+import com.ranjit.todo.todo.dtos.MessageUpdateDTO;
 import com.ranjit.todo.todo.dtos.ResponseBody;
 import com.ranjit.todo.todo.entities.MessageEntity;
+import com.ranjit.todo.todo.enums.MessageStatusEnum;
 import com.ranjit.todo.todo.services.MessageService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -10,9 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -54,4 +55,34 @@ public class MessageController {
         ResponseBody<List<ChatMessageDTO>> responseBody = ResponseBody.success(chatMessageDTOS);
         return ResponseEntity.ok(responseBody);
     }
+
+    @PostMapping(path = "/latest-status")
+    public ResponseEntity<ResponseBody<List<MessageUpdateDTO>>> getMessagesLatestStatus(@RequestBody MessageIdsDTO body){
+        List<String> messageIds = body.getMessageIds();
+        _logger.info("Getting latest status for messages: " + body.getMessageIds());
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<MessageEntity> messages = this._messageService.getMessagesLatestStatus(userDetails.getUsername(), messageIds);
+        List<MessageEntity> readMessages = messages.stream()
+                .filter(message -> message.getStatus().equals(MessageStatusEnum.READ))
+                .toList();
+        List<Long> readMessageIds = readMessages.stream()
+                .map(MessageEntity::getId)
+                .toList();
+        List<MessageUpdateDTO> messageUpdateDTOS = messages.stream()
+                .map(messageEntity -> {
+                    MessageUpdateDTO messageUpdateDTO = new MessageUpdateDTO();
+                    messageUpdateDTO.setMessageId(messageEntity.getId().toString());
+                    messageUpdateDTO.setMessageClientId(messageEntity.getMessageClientId());
+                    messageUpdateDTO.setStatus(messageEntity.getStatus());
+                    return messageUpdateDTO;
+                })
+                .toList();
+
+//        filter out read messages and delete them as it is not required anymore
+
+        this._messageService.deleteMessages(readMessageIds);
+        ResponseBody<List<MessageUpdateDTO>> responseBody = ResponseBody.success(messageUpdateDTOS);
+        return ResponseEntity.ok(responseBody);
+    }
+
 }

@@ -2,6 +2,8 @@ package com.ranjit.todo.todo.controllers;
 
 import com.ranjit.todo.todo.dtos.ResponseBody;
 import com.ranjit.todo.todo.dtos.UserDTO;
+import com.ranjit.todo.todo.dtos.UserStatusUpdate;
+import com.ranjit.todo.todo.dtos.UserStatusUpdatesBodyDTO;
 import com.ranjit.todo.todo.services.UserService;
 import jakarta.websocket.server.PathParam;
 import org.modelmapper.ModelMapper;
@@ -33,7 +35,9 @@ public class UserController {
         UserDTO user = userService.getCurrentUser();
         ResponseBody<UserDTO> res = ResponseBody.success(user);
         return ResponseEntity.ok(res);
-    };
+    }
+
+    ;
 
     @GetMapping("/get/{id}")
     ResponseEntity<ResponseBody<UserDTO>> getUser(@PathVariable("id") Long id) {
@@ -41,7 +45,9 @@ public class UserController {
         UserDTO user = userService.getUserById(id);
         ResponseBody<UserDTO> res = ResponseBody.success(user);
         return ResponseEntity.ok(res);
-    };
+    }
+
+    ;
 
     @GetMapping("/search")
     ResponseEntity<ResponseBody<List<UserDTO>>> searchUser(@RequestParam("searchKey") String searchKey) {
@@ -52,4 +58,11 @@ public class UserController {
     }
 
     ;
+
+    @PostMapping("/status")
+    public ResponseEntity<ResponseBody<List<UserStatusUpdate>>> getUsersStatus(@RequestBody UserStatusUpdatesBodyDTO body) {
+        List<UserStatusUpdate> status =  userService.getUsersStatus(body.getUserIds());
+        ResponseBody<List<UserStatusUpdate>> res = ResponseBody.success(status);
+        return ResponseEntity.ok(res);
+    }
 }
