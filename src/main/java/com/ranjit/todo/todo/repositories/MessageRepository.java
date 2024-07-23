@@ -32,4 +32,12 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     @EntityGraph(value = "Message.withUsers", type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"sender", "receiver"})
     @Query("SELECT m FROM MessageEntity m WHERE m.id IN :ids AND m.sender.id = :senderId")
     List<MessageEntity> findMessagesByIdsAndSenderId(@Param("ids") List<Long> ids, @Param("senderId") Long senderId);
+
+    // delete old messages, old means its status is read
+
+//    @EntityGraph(value = "Message.withUsers", type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"sender", "receiver"})
+    void deleteAllByStatus(MessageStatusEnum status);
+
+
+
 }

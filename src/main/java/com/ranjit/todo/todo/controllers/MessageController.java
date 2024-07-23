@@ -59,15 +59,10 @@ public class MessageController {
     @PostMapping(path = "/latest-status")
     public ResponseEntity<ResponseBody<List<MessageUpdateDTO>>> getMessagesLatestStatus(@RequestBody MessageIdsDTO body){
         List<String> messageIds = body.getMessageIds();
-        _logger.info("Getting latest status for messages: " + body.getMessageIds());
+        _logger.info("Getting latest status for messages: {}", body.getMessageIds());
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<MessageEntity> messages = this._messageService.getMessagesLatestStatus(userDetails.getUsername(), messageIds);
-        List<MessageEntity> readMessages = messages.stream()
-                .filter(message -> message.getStatus().equals(MessageStatusEnum.READ))
-                .toList();
-        List<Long> readMessageIds = readMessages.stream()
-                .map(MessageEntity::getId)
-                .toList();
+
         List<MessageUpdateDTO> messageUpdateDTOS = messages.stream()
                 .map(messageEntity -> {
                     MessageUpdateDTO messageUpdateDTO = new MessageUpdateDTO();
@@ -80,7 +75,6 @@ public class MessageController {
 
 //        filter out read messages and delete them as it is not required anymore
 
-        this._messageService.deleteMessages(readMessageIds);
         ResponseBody<List<MessageUpdateDTO>> responseBody = ResponseBody.success(messageUpdateDTOS);
         return ResponseEntity.ok(responseBody);
     }

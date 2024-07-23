@@ -103,13 +103,19 @@ public class MessageService {
 
     public List<MessageEntity> getMessagesLatestStatus(String userId, List<String> messageIds) {
         List<Long> messageIdsLong = messageIds.stream().map(Long::parseLong).toList();
-        return _messageRepository.findMessagesByIdsAndSenderId(messageIdsLong,Long.parseLong(userId));
+        return _messageRepository.findMessagesByIdsAndSenderId(messageIdsLong, Long.parseLong(userId));
     }
 
-    public void deleteMessages(List<Long> messageIds){
+    public void deleteMessages(List<Long> messageIds) {
         _logger.info("Deleting messages: {}", messageIds);
-        for(Long messageId: messageIds){
+        for (Long messageId : messageIds) {
             _messageRepository.deleteById(messageId);
         }
+    }
+
+    @Transactional
+    public void deleteMessagesByStatus() {
+        _logger.info("Deleting read messages");
+        _messageRepository.deleteAllByStatus(MessageStatusEnum.READ);
     }
 }

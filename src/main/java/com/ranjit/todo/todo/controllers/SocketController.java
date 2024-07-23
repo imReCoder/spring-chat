@@ -39,7 +39,7 @@ public class SocketController {
 
     @MessageMapping("/chat/message.send")
     public void sendMessage(@RequestBody ChatMessageDTO message, Principal principal){
-        _logger.info("Message received: " + message.toString());
+        _logger.info("Message received: {}", message.toString());
         message.setSenderId(principal.getName());
         MessageEntity savedMessage = this.messageService.saveMessage(message);
         String sendingTo = "/topic/"+"message.receiver/"+message.getReceiverId();
@@ -63,7 +63,7 @@ public class SocketController {
 
     @MessageMapping("/chat/message.updates.delivered")
     public void updateMessageToDelivered(@RequestBody MessageUpdateDTO messageUpdate, Principal principal){
-        _logger.info("Message DELIVERED update received: " + messageUpdate.toString());
+        _logger.info("Message DELIVERED update received: {}", messageUpdate.toString());
         messageUpdate.setStatus(MessageStatusEnum.DELIVERED);
 //        MessageEntity message = this.messageService.getMessageById(Long.parseLong(messageUpdate.getMessageId()));
 //        this.messageService.updateAllPreviousMessages(message);
@@ -82,7 +82,7 @@ public class SocketController {
 
     @MessageMapping("/chat/message.updates.read")
     public void updateMessageToRead(@RequestBody MessageUpdateDTO messageUpdate, Principal principal){
-        _logger.info("Message READ update received: " + messageUpdate.toString());
+        _logger.info("Message READ update received: {}", messageUpdate.toString());
         messageUpdate.setStatus(MessageStatusEnum.READ);
         MessageEntity message = this.messageService.updateMessage(messageUpdate);
         if(message == null){
@@ -90,7 +90,7 @@ public class SocketController {
             return;
         }
         String sendingTo = "/topic/"+"message.updates.read/"+message.getSender().getId();
-        _logger.info("Sending to: " + sendingTo);
+        _logger.info("Sending to: {}", sendingTo);
         MessageUpdateDTO messageUpdateDTO = new MessageUpdateDTO();
         messageUpdateDTO.setMessageId(message.getId().toString());
         messageUpdateDTO.setStatus(MessageStatusEnum.READ);
@@ -104,6 +104,7 @@ public class SocketController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 //        get the user id from the principal
         Principal principal = headerAccessor.getUser();
+        assert principal != null;
         String userId = principal.getName();
         this.userOnlineStatus.setUserOnline(userId);
         // Handle user connect event
@@ -115,6 +116,7 @@ public class SocketController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
         Principal principal = headerAccessor.getUser();
+        assert principal != null;
         String userId = principal.getName();
         this.userOnlineStatus.setUserOffline(userId);
         // Handle user disconnect event
